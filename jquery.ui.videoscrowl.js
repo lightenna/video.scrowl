@@ -1,5 +1,5 @@
 /*
- * jQuery UI Videoscroll widget v0.8
+ * jQuery UI videoscrowl widget v0.8
  *
  * Copyright 2012, Lightenna Ltd
  * Licenced under the MIT and BSD licences
@@ -11,7 +11,7 @@
  */
 (function($, undefined) {
 
-  $.widget("ui.videoscroll", {
+  $.widget("ui.videoscrowl", {
     version : "0.8",
     options : {
       'addHeight' : 0, // additional height to introduce
@@ -22,15 +22,15 @@
     },
 
     'destroy' : function() {
-      this.element.removeClass("ui-videoscroll ui-widget").removeAttr("role");
+      this.element.removeClass("ui-videoscrowl ui-widget").removeAttr("role");
       $.Widget.prototype.destroy.apply(this, arguments);
     },
 
     _create : function() {
       var ih, context = this;
       // attach to element
-      this.element.addClass("ui-videoscroll ui-widget").attr({
-        role : "videoscroll"
+      this.element.addClass("ui-videoscrowl ui-widget").attr({
+        role : "videoscrowl"
       });
       // read document dimensions
       ih = $(document).height();

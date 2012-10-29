@@ -17,19 +17,19 @@ test("setup", function() {
 // setup first module
 module("simple tests");
 
-test("convert HTML5 video to videoscroll", function() {
+test("convert HTML5 video to videoscrowl", function() {
   var vq;
   expect(4);
   vq = $('video');
   ok(vq.length, "HTML5 video element exists");
-  equal(vq.hasClass('ui-videoscroll'), false, "HTML5 video is not yet a videoscroll");
-  vq.videoscroll({
+  equal(vq.hasClass('ui-videoscrowl'), false, "HTML5 video is not yet a videoscrowl");
+  vq.videoscrowl({
     'addHeight' : 600
   });
   // check that the window has a scrollbar
   ok($(document).height() > $(window).height(), "window has a scrollbar");
-  // check that the video got turned into a videoscroll
-  ok(vq.hasClass('ui-videoscroll'), "HTML5 video is now a videoscroll");
+  // check that the video got turned into a videoscrowl
+  ok(vq.hasClass('ui-videoscrowl'), "HTML5 video is now a videoscrowl");
 });
 
 module("async");
@@ -119,7 +119,7 @@ module("setup/teardown");
 test("teardown", function() {
   expect(0);
   // jump back up to see the results
-  $('video').videoscroll('destroy');
+  $('video').videoscrowl('destroy');
   // $(document).scrollTop(0);
   // vj = VideoJS('#test_video');
   // vj.pause();
