@@ -27,11 +27,11 @@ Options
 -------
 
 <table>
-<th>
-<td>Option</td>
-<td>Default</td>
-<td>Comment</td>
-</th>
+<tr>
+<th>Option</th>
+<th>Default</th>
+<th>Comment</th>
+</tr>
 <tr>
 <td>addHeight</td>
 <td>0</td>
