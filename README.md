@@ -13,6 +13,6 @@ Installation
 jQuery UI
 ---------
 
-To initialise a <video> element
+To initialise a `<video>` element
 
     jQuery('#my_video_object').videoscrowl();
