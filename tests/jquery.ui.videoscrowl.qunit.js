@@ -2,25 +2,37 @@
 QUnit.config.reorder = false;
 
 module("setup/teardown");
+var vq, vj;
 
+/**
+ * Setup other tests, which run sequentially after this
+ */
 test("setup", function() {
-  expect(0);
+  expect(1);
+  // find video on page
+  vq = $('#test_video');
+  vj = VideoJS('#test_video');
   // bind terminate button to remove video
   $('#terminate').click(function() {
-    var vj = VideoJS('#test_video');
     $(document).scrollTop(0);
     vj.pause();
     $('#test_video').remove();
   });
+  // wait for video ready
+  QUnit.stop();
+  vj.ready(function() {
+    ok(vq.length, 'Video.js ready on <video> object');
+    // almost silence the video
+    vj.volume(0.05);
+    QUnit.start();
+  });
 });
-  
-// setup first module
-module("simple tests");
 
+/**
+ * Initialise Video.js video as videoscrowl resize document to add a scrollbar
+ */
 test("convert HTML5 video to videoscrowl", function() {
-  var vq;
   expect(4);
-  vq = $('video');
   ok(vq.length, "HTML5 video element exists");
   equal(vq.hasClass('ui-videoscrowl'), false, "HTML5 video is not yet a videoscrowl");
   vq.videoscrowl({
@@ -34,10 +46,12 @@ test("convert HTML5 video to videoscrowl", function() {
 
 module("async");
 
-test("play video using API", function() {
-  var vj, start;
+/**
+ * Play the video for 5 seconds and check that the scrollbar is updated
+ */
+test("play video for 5s using API", function() {
+  var start;
   expect(3);
-  vj = VideoJS('#test_video');
   start = vj.currentTime();
   // check scrollbar at top of page
   ok($(document).scrollTop() == 0, "scrollbar at top of page");
@@ -57,70 +71,90 @@ test("play video using API", function() {
   }, 5000);
 });
 
+/**
+ * Advance the player to 66% and check that the scrollbar updates and scrollupdated event triggers
+ */
 test("player jump forward while playing", function() {
-  var time, timepc, timetarget, duration, vj, pagelen, pagetarget, pagepos, pagepc;
+  var time, timepc, timetarget, duration, pagelen, pagetarget, pagepos, pagepc;
   expect(2);
-  vj = VideoJS('#test_video');
   pagelen = $(document).height() - $(window).height();
   vj.play();
-  // jump to 66% (30 seconds) in
+
+  // jump to 66% (30 seconds) in using video.js API (simulated timeline click)
   duration = vj.duration();
   timetarget = duration * 66 / 100;
   vj.currentTime(timetarget);
-  time = vj.currentTime();
-  timepc = time * 100 / duration;
-  // check video jumped to the right place
-  ok((time >= (timetarget - 0.5)) && (time <= (timetarget + 0.5)), "video time jumped to " + Math.round(timetarget)
-      + "s (" + Math.round(timepc) + "%)");
-  // verify scroll position within a few milliseconds
   QUnit.stop();
-  setTimeout(function() {
+
+  // bind to the scrollupdated event
+  vq.videoscrowl('option', 'scrollupdated', function() {
+    // stop listening to event
+    vq.videoscrowl('option', 'scrollupdated', null);
+    // verify the video time
+    time = vj.currentTime();
+    timepc = time * 100 / duration;
+    // check video jumped to the right place
+    ok((time >= (timetarget - 0.5)) && (time <= (timetarget + 0.5)), "video time jumped to " + Math.round(timetarget)
+        + "s (" + Math.round(timepc) + "%)");
+    // verify scroll position
     pagepos = $(document).scrollTop(), pagelen = $(document).height() - $(window).height();
     pagepc = pagepos * 100 / pagelen;
     // check that the scroll bar moved to the right place (within 5%)
     ok(Math.abs(pagepc - timepc) < 5, "scrollbar has moved to " + Math.round($(document).scrollTop()) + "px ("
         + Math.round(pagepc) + "%)");
     vj.pause();
-    // kick of QUnit again
+    // restart the tests
     QUnit.start();
-  }, 10);
+  });
 });
 
+/**
+ * Set the scrollbar back to 33% and check that the video updates and the videoupdated event fires
+ */
 test("scrollbar jump back while playing", function() {
-  var time, timepc, timetarget, duration, vj, pagelen, pagetarget, pagepos, pagepc;
+  var time, timepc, timetarget, duration, pagelen, pagetarget, pagepos, pagepc;
   expect(2);
-  vj = VideoJS('#test_video');
   pagelen = $(document).height() - $(window).height();
   vj.play();
-  // jump to 33% (200px) in
+
+  // aim for 33% (200px) in
   pagetarget = pagelen * 33 / 100;
-  $(document).scrollTop(pagetarget);
-  $(document).trigger('scroll');
-  pagepos = $(document).scrollTop();
-  pagepc = pagepos * 100 / pagelen;
-  // check the scrollbar jumped to the right place
-  ok(Math.abs(pagepos - pagetarget) < 5, "page scrolled to " + Math.round(pagepos) + "px (" + Math.round(pagepc) + "%)");
-  // verify player position within a few milliseconds
   QUnit.stop();
-  setTimeout(function() {
+
+  // bind to the videoupdated event
+  vq.videoscrowl('option', 'videoupdated', function() {
+    console.log('video updated');
+    // stop listening to event
+    vq.videoscrowl('option', 'videoupdated', null);
+    // verify the page position
+    pagepos = $(document).scrollTop();
+    pagepc = pagepos * 100 / pagelen;
+    // check the scrollbar jumped to the right place
+    ok(Math.abs(pagepos - pagetarget) < 5, "page scrolled to " + Math.round(pagepos) + "px (" + Math.round(pagepc)
+        + "%)");
+    // verify video time
     duration = vj.duration();
     time = vj.currentTime();
     timepc = time * 100 / duration;
-    ok(Math.abs(pagepc - timepc) < 5, "video time jumped to " + Math.round(time)
-        + "s (" + Math.round(timepc) + "%)");
+    ok(Math.abs(pagepc - timepc) < 5, "video time jumped to " + Math.round(time) + "s (" + Math.round(timepc) + "%)");
     vj.pause();
-    // kick of QUnit again
+    // restart QUnit
     QUnit.start();
-  }, 10);
+  });
+
+  // mimic using scrollbar (simulated scroll click)
+  $(document).scrollTop(pagetarget);
+  $(document).trigger('scroll');
+
 });
 
 module("setup/teardown");
 
+/**
+ * Clean up to ensure that failed tests don't leave any video playing in the background
+ */
 test("teardown", function() {
   expect(0);
   // jump back up to see the results
-  $('video').videoscrowl('destroy');
-  // $(document).scrollTop(0);
-  // vj = VideoJS('#test_video');
-  // vj.pause();
+  $('#test_video').videoscrowl('destroy');
 });

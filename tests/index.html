@@ -7,8 +7,6 @@
 
 <title>Videoscrowl QUnit Test Suite</title>
 
-<!-- QUnit styles -->
-<link rel="stylesheet" href="vendor/qunit.css">
 <!-- Load Video.js -->
 <link href="http://vjs.zencdn.net/c/video-js.css" rel="stylesheet">
 <script src="http://vjs.zencdn.net/c/video.js"></script>
@@ -28,15 +26,15 @@
 
 <body>
 	<!-- QUnit stucture -->
-	<div class="dataset-test">
+	<div id="test_results" class="dataset-test">
 		<h1 id="qunit-header">Videoscrowl QUnit Test Suite</h1>
 		<h2 id="qunit-banner"></h2>
 		<h2 id="qunit-userAgent"></h2>
 		<ol id="qunit-tests"></ol>
 	</div>
 
-	<!-- Main container. -->
-	<div role="main" id="main" style="display: none;">
+	<!-- Main container (has to be slightly visible for Safari) -->
+	<div role="main" id="main" style="position: absolute; left: -639px;">
 		<video id="test_video" class="video-js vjs-default-skin" controls
 			preload=auto width=640 height=264
 			poster="http://video-js.zencoder.com/oceans-clip.jpg" data-setup='{}'>
