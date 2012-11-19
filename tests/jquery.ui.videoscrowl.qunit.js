@@ -154,7 +154,27 @@ module("setup/teardown");
  * Clean up to ensure that failed tests don't leave any video playing in the background
  */
 test("teardown", function() {
-  expect(0);
-  // jump back up to see the results
+  var start;
+  expect(3);
+  start = vj.currentTime();
+  // destroy scrowl
   $('#test_video').videoscrowl('destroy');
+  // jump back to the top
+  $(document).scrollTop(0);
+  ok($(document).scrollTop() == 0, "scrollbar correctly reset to " + Math.round($(document).scrollTop()) + "px");
+  // play, then make sure we're not still scrolling
+  vj.play();
+  QUnit.stop();
+  setTimeout(function() {
+    var finish = vj.currentTime();
+    // check that the counter advanced
+    ok((finish - start) != 0, "video played " + Math.round(finish - start) + " seconds");
+    vj.pause(); // pause the video
+    // check that the scroll bar DID NOT start moving
+    ok($(document).scrollTop() == 0, "scrollbar has moved to " + Math.round($(document).scrollTop()) + "px");
+    vj.pause();
+    // kick of QUnit again
+    QUnit.start();
+  }, 5000);
+
 });

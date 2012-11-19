@@ -29,7 +29,7 @@
       'videoupdated' : null,
       'scrollupdated' : null,
 
-      '_' : false
+      '_z' : false
     },
 
     /**
@@ -41,7 +41,15 @@
      */
     'destroy' : function() {
       var that = this;
+      // remove CSS
       that.element.removeClass("ui-videoscrowl ui-widget").removeAttr("role");
+      // clear callbacks
+      clearTimeout(that.__disablePlayerCallback);
+      clearTimeout(that.__disableScrollCallback);
+      // detach from player/scroll events
+      that.player.removeEvent("timeupdate", that._playerTimeUpdateEvent);
+      $(window).unbind('scroll', that._scrollEvent);
+      // tell the widget to destory itself
       $.Widget.prototype.destroy.apply(that, arguments);
     },
 
@@ -150,7 +158,7 @@
     },
 
     _playerTimeUpdateEventAttach : function(that) {
-      return function() {
+      return function _playerTimeUpdateEvent() {
         var time, position;
         // lock critical section to avoid livelock
         if (that.__disablePlayerEvent)
@@ -179,7 +187,7 @@
     },
 
     _scrollEventAttach : function(that) {
-      return function() {
+      return function _scrollEvent() {
         var position, video_perc, time;
         // lock critical section to avoid livelock
         if (that.__disableScrollEvent)
